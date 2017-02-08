@@ -1,6 +1,7 @@
 package net.corda.flows
 
 import co.paralleluniverse.fibers.Suspendable
+import net.corda.core.contracts.StateRef
 import net.corda.core.crypto.DigitalSignature
 import net.corda.core.crypto.Party
 import net.corda.core.crypto.SignedData
@@ -51,6 +52,16 @@ object NotaryFlow {
             } catch (ex: SignedTransaction.SignaturesMissingException) {
                 throw NotaryException(NotaryError.SignaturesMissing(ex))
             }
+
+
+            val filteredTx = {
+                wtx.buildFilteredTransaction {
+                    it is StateRef
+                }
+            }()
+
+
+
 
             val response = try {
                 sendAndReceive<DigitalSignature.WithKey>(notaryParty, SignRequest(stx))
